@@ -74,5 +74,53 @@ a known-good backup (or deliberately move it aside to start empty), then restart
 - Error responses are intentionally generic. StorageError preserves its cause for
   server-side debugging; structured logging/observability is not implemented yet.
 
-The frontend remains the original Checkpoint 01 shell. Task UI, API integration,
-loading/error states and light/dark themes remain Checkpoint 03 scope.
+## Frontend — Checkpoint 03
+
+The original React/Vite/Tailwind/Lucide workspace now contains the task UI. No new
+runtime dependency, workspace or backend change was needed.
+
+- `api/tasks.ts`: relative fetch requests, 15-second timeout, runtime response guards,
+  stable public error messages and uncertain-mutation classification.
+- `tasks/types.ts`: browser-only types matching the documented API; no server imports.
+- `tasks/useTasks.ts`: collection, read state, mutation lock and success announcements.
+- `tasks/TaskForm.tsx`: reusable create/edit values, client limits, pending state and
+  retained drafts on failure. The backend remains authoritative for validation.
+- `tasks/TaskRow.tsx`, `TaskStats.tsx`: presentation of tasks and derived statistics.
+- `components/Dialog.tsx`, `tasks/DeleteDialog.tsx`: native modal behavior and confirmation.
+- `theme/ThemeControl.tsx`, `public/theme.js`: system/explicit preferences and early theme setup.
+- `App.tsx`: screen composition, selected filter and selected task dialogs.
+
+Read requests have AbortControllers and generation checks. StrictMode's discarded
+initial request cannot overwrite the active result. Mutations occur only in event
+handlers, never effects. A synchronous ref lock prevents same-tick duplicate writes;
+controls also visibly disable while one mutation is pending. V1 intentionally allows
+one UI mutation at a time, a simpler rule than concurrent per-row queues.
+
+No optimistic mutation is used: the list changes only after a valid server success
+response. POST appends, PATCH replaces in place, DELETE removes in place, preserving
+backend insertion order. Filters/counts/progress are derived, not separately stored.
+After creation, All is selected so the new active task is visible under any previous
+filter. A successful edit can move a task out of the current filter.
+
+Network/timeout failures or malformed success responses may occur after a write was
+committed. The client never retries a mutation automatically. It retains the draft,
+blocks writes and asks for a successful read refresh before manual resubmission.
+Confirmed HTTP failures are shown without falsely changing the task collection.
+Separate tabs are not live-synchronized; Refresh tasks explicitly re-reads the server.
+
+Theme preferences use only `taskflow-theme` in localStorage. System mode follows
+`prefers-color-scheme` changes and removes that key. Storage access is guarded;
+a blocked localStorage still allows an in-memory choice. A small pre-React script
+sets the root theme before styles render to reduce reload flashing.
+
+Native `<dialog>.showModal()` supplies background inertness and keyboard containment.
+The wrapper restores focus to the trigger, or the task heading when the trigger was
+removed. Escape/cancel are blocked only while a mutation is in flight. Semantic labels,
+native checkboxes/progress, described validation messages, live status, focus outlines
+and reduced-motion styling support accessible interaction. This is not a claim of
+formal WCAG certification; cross-browser and assistive-technology review remains.
+
+The current frontend expects a modern browser with native dialog, matchMedia,
+AbortSignal.timeout/any and fetch support. UI strings are English. There is no offline
+queue or draft persistence. Checkpoint 04 will perform the final quality review and
+portfolio preparation; V1.0.0 has not been released.

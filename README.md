@@ -2,10 +2,12 @@
 
 A focused task management application built with React, Express, and strict TypeScript.
 
-**Status: Checkpoint 02 — Backend complete for review. This is not the finished V1 application.**
-The REST API supports task creation, listing, editing, completion and deletion with
-persistent JSON storage. The frontend remains the Checkpoint 01 preview; task UI,
-filtering and themes are deferred to Checkpoint 03.
+**Status: Checkpoint 03 — Complete frontend, ready for independent review. V1 is not yet released.**
+
+Create, edit, complete and delete tasks through a responsive React interface connected
+to the existing Express API. Filter by status, track real counts/progress, and choose
+light, dark or system appearance. JSON persistence remains on the local backend.
+No account is required; this is one shared local task collection.
 
 ## Quick start
 
@@ -37,8 +39,11 @@ The frontend has no environment variables at this checkpoint.
 | `npm start -w @taskflow/api` | Run compiled API after building |
 | `npm run preview -w @taskflow/web` | Preview built frontend locally |
 
-Vite preview is a local bundle preview, not a production server. Production hosting
-and same-origin `/api` reverse proxy configuration are not included yet.
+Use `npm run dev` for the complete local application. The existing Vite development
+proxy connects relative `/api` requests to Express. `vite preview` only previews the
+built frontend and does not configure the development API proxy; it is not the
+full-stack acceptance command or a production server. Production hosting and
+same-origin `/api` reverse proxy configuration are not included yet.
 
 ## Structure and architecture
 
@@ -49,7 +54,7 @@ apps/
     tests/         Isolated API, storage, concurrency and failure-path tests
     data/          Runtime JSON storage (gitignored)
   web/
-    src/           React foundation shell, CSS and component tests
+    src/           API client, task state/components, themes and UI tests
 .github/workflows/ CI quality gate
 docs/             Architecture, API contract and checkpoint report
 ```
@@ -68,6 +73,20 @@ See [architecture](docs/ARCHITECTURE.md) for the repository boundary and
 Each checkpoint must pass its gates before the next begins. The project will be
 released as V1.0.0 only when all four checkpoints are complete.
 
+## Using TaskFlow
+
+- Add a title and optional description in **New task**. Adding a task selects **All**
+  so the server-confirmed result is visible.
+- Use a task checkbox to change completion. The UI waits for server confirmation.
+- Edit through the pencil button. Save or cancel; Escape closes idle dialogs.
+- Delete through the trash button and confirm. Cancel receives initial focus.
+- Filter with **All**, **Active**, **Completed**. Counts always describe the full collection.
+- Choose **System**, **Light** or **Dark** in the header. Only an explicit theme choice
+  is stored in the browser; tasks remain on the server.
+- Use **Refresh tasks** to pick up changes from another tab or recover after errors.
+  An uncertain mutation blocks further writes until a successful refresh. Check the
+  refreshed collection before manually resubmitting: POST has no idempotency keys.
+
 ## Local storage
 
 Tasks are saved automatically to `apps/api/data/tasks.json` on first access.
@@ -78,13 +97,15 @@ instance per file; this adapter does not provide multi-process transactions.
 Corrupt files return HTTP 503 and are never automatically reset. See the architecture
 document for recovery steps and durability limitations.
 
-See [Checkpoint 02](docs/CHECKPOINT-02.md) for validation results, a file change
-inventory and PowerShell API testing instructions.
+See [Checkpoint 03](docs/CHECKPOINT-03.md) for current validation results, browser
+acceptance steps and the file change inventory. [Checkpoint 02](docs/CHECKPOINT-02.md)
+retains the backend PowerShell walkthrough and historical results.
 
 ## Screenshots
 
 Final desktop, mobile, light and dark screenshots will be added in Checkpoint 04.
-The current page is explicitly a foundation preview, not a completed task interface.
+Checkpoint 03 was visually checked in both themes on desktop and mobile; final
+portfolio screenshots remain Checkpoint 04 scope.
 
 ## AI assistance
 

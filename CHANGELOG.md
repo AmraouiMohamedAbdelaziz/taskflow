@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased — Checkpoint 03 — 2026-10-16
+
+- Replace the foundation preview with a responsive task management interface.
+- Connect create/edit/complete/delete flows to the existing REST API.
+- Add filters, real counters/progress, confirmation dialogs and explicit error states.
+- Add system/light/dark themes with local preference persistence.
+- Add typed fetch response guards, stale-read protection and guarded mutations.
+- Add frontend tests and verify Chromium flows against isolated real JSON storage.
+- Preserve the Checkpoint 02 backend, API contract and dependency lockfile.
+- Await independent review; Checkpoint 04 and V1.0.0 release have not started.
+
 ## Unreleased — Checkpoint 02 — 2026-10-16
 
 - Add validated task CRUD endpoints and consistent safe error responses.
