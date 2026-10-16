@@ -1,7 +1,8 @@
 import { createApp } from './app.js';
 import { parseConfig } from './config.js';
+import { JsonTaskRepository } from './storage/json-task-repository.js';
 const config = parseConfig(process.env);
-const server = createApp().listen(config.PORT, config.HOST, () => {
+const server = createApp(new JsonTaskRepository(config.TASKS_FILE)).listen(config.PORT, config.HOST, () => {
   console.info(`TaskFlow API: http://${config.HOST}:${config.PORT}`);
 });
 server.on('error', (error: Error) => {
