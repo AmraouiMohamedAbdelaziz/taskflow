@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0 — Prepared, unreleased — Checkpoint 04 — 2026-10-17
+
+- Retain complete task CRUD, filtering, statistics, themes and atomic JSON persistence.
+- Restore create-form focus after pending state ends and announce validation errors.
+- Reject impossible response dates and inherited error-message property names.
+- Wrap filters at narrow widths with enlarged text.
+- Add local Host/Origin protection and conservative API response headers.
+- Pin CI actions and verify Node.js 24/npm 11 installation.
+- Add 20 regression cases (126 tests total) and optional real-browser/axe acceptance.
+- Verify Chromium and Firefox; record unavailable WebKit and screen-reader checks.
+- Include four authentic screenshots, final audit and proposed release notes.
+- Prepare consistent 1.0.0 metadata only; no commit, tag, push, deployment or release.
+
 ## Unreleased — Checkpoint 03 — 2026-10-16
 
 - Replace the foundation preview with a responsive task management interface.

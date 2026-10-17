@@ -1,4 +1,4 @@
-# TaskFlow API — Checkpoint 02
+# TaskFlow API — V1.0.0 review
 
 Development base URL: `http://127.0.0.1:3001`. All responses are JSON.
 There is one shared collection, no authentication and no user isolation.
@@ -71,6 +71,7 @@ Responses do not expose stack traces, filesystem paths, stored data, or Zod inte
 | 400 | `VALIDATION_ERROR` | Invalid fields, empty update, missing body, or invalid UUID |
 | 400 | `INVALID_JSON` | Malformed JSON; scalar/null JSON rejected by the object parser |
 | 400 | `INVALID_REQUEST` | Invalid URL encoding or invalid/incomplete body transport |
+| 403 | `LOCAL_ACCESS_ONLY` | Host or supplied Origin is not an allowed loopback address |
 | 404 | `TASK_NOT_FOUND` | Valid UUID has no matching task |
 | 404 | `NOT_FOUND` | Unknown route; message is `Route not found.` |
 | 413 | `PAYLOAD_TOO_LARGE` | Body exceeds 32 KiB |
@@ -82,3 +83,18 @@ Arrays are valid JSON but fail object validation. Validation occurs before task
 lookup. Thus an invalid PATCH body returns 400 even for a nonexistent UUID.
 A repeated DELETE returns 404. There is no automatic retry or idempotency key;
 a client losing a POST response cannot assume that creation failed.
+
+## Local access and response headers
+
+Host must be `localhost`, `127.0.0.1` or `[::1]`, optionally with a port. If Origin
+is supplied, it must be a canonical HTTP(S) origin on one of those hosts. Missing
+Origin is accepted for CLI clients. Untrusted origins (including `null`) and Hosts
+are rejected before body parsing/routing; this also applies to health/unknown routes.
+Normal local unknown routes retain their JSON 404. No credentialed CORS is enabled.
+
+All API responses set `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`,
+`Cross-Origin-Resource-Policy: same-origin` and
+`Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`. ETags and
+Express's powered-by header are disabled. CSP applies only to API responses.
+These checks are defense in depth, not authentication or permission checks. Do not
+expose the unauthenticated API publicly; forged headers do not establish identity.

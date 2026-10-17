@@ -2,12 +2,19 @@
 
 A focused task management application built with React, Express, and strict TypeScript.
 
-**Status: Checkpoint 03 — Complete frontend, ready for independent review. V1 is not yet released.**
+**Status: V1.0.0 — Local application release. Not publicly deployed.**
 
 Create, edit, complete and delete tasks through a responsive React interface connected
 to the existing Express API. Filter by status, track real counts/progress, and choose
 light, dark or system appearance. JSON persistence remains on the local backend.
 No account is required; this is one shared local task collection.
+
+## Technology
+
+React 19, strict TypeScript, Vite 8, Tailwind CSS 4 and Lucide React; Node.js 24,
+Express 5 and Zod 4; JSON file persistence behind a repository interface. Vitest,
+React Testing Library and Supertest cover regression behavior. Optional Playwright
+and axe-core checks exercise the real application.
 
 ## Quick start
 
@@ -24,20 +31,21 @@ Both development processes stop together when interrupted or when one exits.
 
 Optional: copy `apps/api/.env.example` to `apps/api/.env` to override backend settings.
 If you change the API port, update the proxy target in `apps/web/vite.config.ts` too.
-The frontend has no environment variables at this checkpoint.
+The frontend has no environment variables.
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start frontend and backend with reload |
-| `npm run lint` | ESLint, zero warnings allowed |
-| `npm run typecheck` | Check both workspaces, tests and configuration |
-| `npm test` | Run Vitest, RTL and Supertest tests |
-| `npm run build` | Compile API and bundle web |
-| `npm run check` | Run all quality gates |
-| `npm start -w @taskflow/api` | Run compiled API after building |
-| `npm run preview -w @taskflow/web` | Preview built frontend locally |
+| Command                            | Purpose                                                  |
+| ---------------------------------- | -------------------------------------------------------- |
+| `npm run dev`                      | Start frontend and backend with reload                   |
+| `npm run lint`                     | ESLint, zero warnings allowed                            |
+| `npm run typecheck`                | Check both workspaces, tests and configuration           |
+| `npm test`                         | Run Vitest, RTL and Supertest tests                      |
+| `npm run build`                    | Compile API and bundle web                               |
+| `npm run check`                    | Run lint, types, unit/integration tests and build        |
+| `npm run test:browser`             | Optional real Chromium acceptance; install browser first |
+| `npm start -w @taskflow/api`       | Run compiled API after building                          |
+| `npm run preview -w @taskflow/web` | Preview built frontend locally                           |
 
 Use `npm run dev` for the complete local application. The existing Vite development
 proxy connects relative `/api` requests to Express. `vite preview` only previews the
@@ -70,8 +78,9 @@ See [architecture](docs/ARCHITECTURE.md) for the repository boundary and
 3. **Frontend:** full task UI, API integration, themes, responsive states and accessibility.
 4. **Quality:** complete validation, security/accessibility review, screenshots and portfolio polish.
 
-Each checkpoint must pass its gates before the next begins. The project will be
-released as V1.0.0 only when all four checkpoints are complete.
+All four checkpoints are implemented. Publication remains subject to independent
+review and explicit approval. See the [final audit](docs/CHECKPOINT-04.md) and
+[proposed release notes](docs/RELEASE-NOTES-1.0.0.md).
 
 ## Using TaskFlow
 
@@ -97,15 +106,55 @@ instance per file; this adapter does not provide multi-process transactions.
 Corrupt files return HTTP 503 and are never automatically reset. See the architecture
 document for recovery steps and durability limitations.
 
-See [Checkpoint 03](docs/CHECKPOINT-03.md) for current validation results, browser
-acceptance steps and the file change inventory. [Checkpoint 02](docs/CHECKPOINT-02.md)
+See [Checkpoint 04](docs/CHECKPOINT-04.md) for final validation results, limitations,
+manual acceptance steps and the changed-file inventory. [Checkpoint 02](docs/CHECKPOINT-02.md)
 retains the backend PowerShell walkthrough and historical results.
 
 ## Screenshots
 
-Final desktop, mobile, light and dark screenshots will be added in Checkpoint 04.
-Checkpoint 03 was visually checked in both themes on desktop and mobile; final
-portfolio screenshots remain Checkpoint 04 scope.
+Real Chromium captures using fictional tasks (four tasks, one completed). Compact PNGs,
+about 450 KiB combined. Mobile images show the full scrollable page.
+
+| Desktop light                                                                                                            | Desktop dark                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| ![TaskFlow desktop light theme with task editor, four tasks and 25 percent progress](docs/screenshots/desktop-light.png) | ![TaskFlow desktop dark theme showing the same fictional task collection](docs/screenshots/desktop-dark.png) |
+
+| Mobile light                                                                                      | Mobile dark                                                                                                          |
+| ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| ![TaskFlow mobile light theme with stacked form and task list](docs/screenshots/mobile-light.png) | ![TaskFlow mobile dark theme with completion badges and accessible action buttons](docs/screenshots/mobile-dark.png) |
+
+## Validation
+
+`npm run check` passed with **126 tests: 88 API and 38 frontend**. Real Chromium
+and Firefox acceptance passed, including 22 axe-core scans with no detected
+violations. WebKit, physical mobile devices, native browser zoom and screen readers
+remain unverified. These checks are not WCAG or security certification.
+
+Optional browser checks use disposable storage and require free ports 3001/5173:
+
+```sh
+npx playwright install chromium firefox
+npm run test:browser
+node scripts/browser-audit.mjs --browser=firefox
+# Recreate the four screenshots after building:
+node scripts/browser-audit.mjs --screenshots
+```
+
+Install browser system dependencies where required. Browser checks are intentionally
+separate from the fast CI gate. See the final audit for environment-specific results.
+
+## Security and limitations
+
+This is a local, single-user application with **no authentication**. Anyone able to
+call the API can read or change the shared collection. Keep it on loopback; do not
+expose it publicly. Host/Origin checks accept only localhost, 127.0.0.1 and [::1]
+(with optional ports). They reduce browser-origin risks but do not authenticate
+clients: non-browser callers can forge headers. Arbitrary LAN hostnames are rejected.
+
+There is no pagination, multi-process transaction support, offline queue or automatic
+cross-tab synchronization. Keep backups of the JSON data. Public hosting would require
+a separate security/deployment design, including access control, TLS, limits and
+frontend response headers. The API CSP is not a frontend deployment policy.
 
 ## AI assistance
 

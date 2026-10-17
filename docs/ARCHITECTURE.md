@@ -74,7 +74,7 @@ a known-good backup (or deliberately move it aside to start empty), then restart
 - Error responses are intentionally generic. StorageError preserves its cause for
   server-side debugging; structured logging/observability is not implemented yet.
 
-## Frontend — Checkpoint 03
+## Frontend
 
 The original React/Vite/Tailwind/Lucide workspace now contains the task UI. No new
 runtime dependency, workspace or backend change was needed.
@@ -118,9 +118,32 @@ The wrapper restores focus to the trigger, or the task heading when the trigger 
 removed. Escape/cancel are blocked only while a mutation is in flight. Semantic labels,
 native checkboxes/progress, described validation messages, live status, focus outlines
 and reduced-motion styling support accessible interaction. This is not a claim of
-formal WCAG certification; cross-browser and assistive-technology review remains.
+formal WCAG certification. Chromium and Firefox keyboard/axe checks passed;
+screen-reader and WebKit review remains.
 
 The current frontend expects a modern browser with native dialog, matchMedia,
 AbortSignal.timeout/any and fetch support. UI strings are English. There is no offline
-queue or draft persistence. Checkpoint 04 will perform the final quality review and
+queue or draft persistence. Checkpoint 04 records the final quality review and
 portfolio preparation; V1.0.0 has not been released.
+
+## Checkpoint 04 decisions
+
+The existing layers and contracts are retained. `http/local-security.ts` is a small
+HTTP boundary middleware: loopback Host/Origin checks, no-store, nosniff, same-origin
+resource policy and an API-only CSP. It does not belong in the domain or repository.
+See API documentation for the new local-access 403 and accepted hostnames. These
+headers cannot protect an unauthenticated API exposed to arbitrary network clients.
+
+The frontend verifies UUIDs and real UTC dates before accepting server data; inherited
+object properties cannot become error messages. Successful creation restores focus
+after the input is enabled. Form errors are polite live regions. Filter buttons wrap
+under enlarged text instead of forcing horizontal overflow. No UI redesign was needed.
+
+Playwright and axe-core are root development dependencies only, not application runtime
+dependencies. `scripts/browser-audit.mjs` builds on the actual Express API and Vite
+frontend, launches its own servers, owns a disposable temporary data file and cleans
+up resources. It fails on occupied ports rather than using someone's existing server.
+This optional acceptance script stays outside CI; default CI remains deterministic
+unit/integration tests, lint, strict type checking and builds. Actions are pinned to
+reviewed v4 commit SHAs with read-only repository permissions and no persisted Git
+credentials. Actual remote GitHub Actions execution requires the user's publication.

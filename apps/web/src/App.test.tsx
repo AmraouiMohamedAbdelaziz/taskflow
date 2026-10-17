@@ -189,3 +189,17 @@ describe('Task workspace', () => {
     expect(localStorage.getItem('taskflow-theme')).toBeNull();
   });
 });
+
+it('restores keyboard focus to the enabled title field after creation', async () => {
+  mockApi(); render(<App />); await ready(); fillTitle('Keyboard task');
+  screen.getByRole('button', { name: 'Add task' }).focus(); submit();
+  await screen.findByRole('heading', { name: 'Keyboard task' });
+  await waitFor(() => expect(within(createForm()).getByRole('textbox', { name: /^Title/ })).toHaveFocus());
+});
+it('renders untrusted task HTML as text, never as executable elements', async () => {
+  const malicious = '<img src=x onerror=alert(1)>';
+  mockApi([{ ...first, title: malicious, description: '<script>alert(1)</script>' }]);
+  render(<App />); await ready();
+  expect(screen.getByRole('heading', { name: malicious })).toBeVisible();
+  expect(document.querySelector('main img, main script')).toBeNull();
+});

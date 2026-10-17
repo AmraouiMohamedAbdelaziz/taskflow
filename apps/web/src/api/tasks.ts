@@ -8,17 +8,22 @@ export class ApiError extends Error {
 function object(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function timestamp(value: unknown): value is string {
-  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T.*Z$/.test(value) && Number.isFinite(Date.parse(value));
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(value)) return false;
+  const parsed = Date.parse(value);
+  if (!Number.isFinite(parsed)) return false;
+  // Reject dates normalized by Date.parse, such as February 30.
+  return new Date(parsed).toISOString().slice(0, 19) === value.slice(0, 19);
 }
 function isTask(value: unknown): value is Task {
   return object(value) && typeof value.id === 'string' && uuid.test(value.id)
-    && typeof value.title === 'string' && value.title.trim().length > 0 && value.title.length <= 200
+    && typeof value.title === 'string' && value.title.length > 0 && value.title === value.title.trim() && value.title.length <= 200
     && (value.description === undefined || typeof value.description === 'string' && value.description.length <= 5000)
     && typeof value.completed === 'boolean' && timestamp(value.createdAt) && timestamp(value.updatedAt);
 }
 const messages: Record<string, string> = {
+  LOCAL_ACCESS_ONLY: 'Open TaskFlow using localhost or 127.0.0.1.',
   VALIDATION_ERROR: 'The server rejected these values. Check the task fields and try again.',
   INVALID_JSON: 'The request could not be read. Refresh the page and try again.',
   TASK_NOT_FOUND: 'This task no longer exists. Refresh tasks to update your list.',
@@ -52,7 +57,7 @@ async function send(method: string, path: string, body?: TaskInput | TaskUpdate,
   if (!response.ok) {
     if (object(payload) && object(payload.error) && typeof payload.error.code === 'string'
       && typeof payload.error.message === 'string') {
-      throw new ApiError(messages[payload.error.code] ?? 'The request failed. Refresh tasks and try again.', false, payload.error.code);
+      throw new ApiError((Object.hasOwn(messages, payload.error.code) ? messages[payload.error.code] : undefined) ?? 'The request failed. Refresh tasks and try again.', false, payload.error.code);
     }
     throw unexpected(mutation);
   }

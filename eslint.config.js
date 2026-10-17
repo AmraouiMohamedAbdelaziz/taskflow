@@ -6,6 +6,7 @@ import refresh from 'eslint-plugin-react-refresh';
 export default tseslint.config(
   { ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**'] },
   js.configs.recommended,
+  { files: ['scripts/browser-audit.mjs'], languageOptions: { globals: { ...globals.node, ...globals.browser } } },
   ...tseslint.configs.recommended,
   { files: ['**/*.js', '**/*.ts', '**/*.tsx'], languageOptions: { globals: globals.node } },
   { files: ['apps/web/public/*.js'], languageOptions: { globals: globals.browser } },

@@ -19,3 +19,12 @@ it('rejects mismatched identifiers on update/delete', async () => {
   fetcher.mockResolvedValueOnce(response({ data: { id: 'different' } }));
   await expect(taskApi.remove(first.id)).rejects.toMatchObject({ uncertain: true });
 });
+
+it.each(['2026-02-30T12:00:00.000Z', '2026-10-16T12:00Z', '2026-10-16T24:00:00.000Z'])('rejects invalid/non-contract timestamp %s', async (createdAt) => {
+  const fetcher = mockApi(); fetcher.mockResolvedValueOnce(response({ data: [{ ...first, createdAt }] }));
+  await expect(taskApi.list()).rejects.toThrow('unexpected response');
+});
+it.each(['__proto__', 'constructor', 'toString'])('normalizes unknown error code %s without prototype lookups', async (code) => {
+  const fetcher = mockApi(); fetcher.mockResolvedValueOnce(response({ error: { code, message: 'Internal details' } }, 500));
+  await expect(taskApi.list()).rejects.toThrow('The request failed. Refresh tasks and try again.');
+});
